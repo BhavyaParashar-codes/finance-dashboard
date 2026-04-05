@@ -20,15 +20,21 @@ const containerVariants = { hidden: {}, visible: { transition: { staggerChildren
 const itemVariants = { hidden: { opacity: 0, x: -12 }, visible: { opacity: 1, x: 0, transition: { duration: 0.35, ease: [0.16, 1, 0.3, 1] } } }
 
 function NetWorthDisplay({ value, currency }) {
-  const animated = useCountUp(Math.abs(value), 1200)
+  const RATES = { INR: 1, USD: 0.012, EUR: 0.011 }
+  const SYMS = { INR: '₹', USD: '$', EUR: '€' }
+  const rate = RATES[currency] || 1
+  const sym = SYMS[currency] || '₹'
+  const converted = Math.round(Math.abs(value) * rate)
+  const animated = useCountUp(converted, 1200)
+  const locale = currency === 'INR' ? 'en-IN' : 'en-US'
   return (
     <span className={`text-4xl font-bold font-mono tracking-tight ${value >= 0 ? 'text-teal' : 'text-red-500'}`}>
-      {value < 0 ? '−' : ''}₹{animated.toLocaleString('en-IN')}
+      {value < 0 ? '−' : ''}{sym}{animated.toLocaleString(locale)}
     </span>
   )
 }
 
-const ChartTooltip = ({ active, payload, label }) => {
+const ChartTooltip = ({ active, payload, label, currency }) => {
   if (!active || !payload?.length) return null
   return (
     <div className="bg-white dark:bg-navy-800 border border-border dark:border-navy-700 rounded-xl shadow-glass p-3 text-sm min-w-[160px]">
@@ -38,7 +44,7 @@ const ChartTooltip = ({ active, payload, label }) => {
           <span className="w-2 h-2 rounded-full" style={{ background: p.color || p.fill }} />
           <span className="text-navy-400 capitalize text-xs">{p.dataKey}:</span>
           <span className="font-medium text-navy dark:text-white ml-auto pl-2 text-xs font-mono">
-            {formatCurrency(p.value, true)}
+            {formatCurrency(p.value, true, currency)}
           </span>
         </div>
       ))}
@@ -46,7 +52,7 @@ const ChartTooltip = ({ active, payload, label }) => {
   )
 }
 
-function ItemRow({ item, colors, onEdit, onDelete, isAdmin }) {
+function ItemRow({ item, colors, onEdit, onDelete, isAdmin, currency }) {
   const color = colors[item.category] || '#78909C'
   return (
     <motion.div variants={itemVariants}
@@ -55,7 +61,7 @@ function ItemRow({ item, colors, onEdit, onDelete, isAdmin }) {
       <span className="text-sm text-navy dark:text-white flex-1 truncate">{item.name}</span>
       <span className="text-xs text-navy-400 dark:text-navy-400 capitalize hidden sm:block">{item.category}</span>
       <span className="text-sm font-semibold font-mono text-navy dark:text-white">
-        {formatCurrency(item.value, true)}
+        {formatCurrency(item.value, true, currency)}
       </span>
       {isAdmin && (
         <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -165,7 +171,7 @@ export default function NetWorth() {
             ? <TrendingUp size={14} className="text-emerald-500" />
             : <TrendingDown size={14} className="text-red-500" />}
           <span className={`text-sm font-medium ${change >= 0 ? 'text-emerald-500' : 'text-red-500'}`}>
-            {change >= 0 ? '+' : ''}{formatCurrency(change, true)} ({changePct}%)
+            {change >= 0 ? '+' : ''}{formatCurrency(change, true, currency)} ({changePct}%)
           </span>
           <span className="text-xs text-navy-400">vs last month</span>
         </div>
@@ -202,8 +208,8 @@ export default function NetWorth() {
             <CartesianGrid strokeDasharray="3 3" stroke="#D9E2EC" strokeOpacity={0.5} vertical={false} />
             <XAxis dataKey="month" tick={{ fontSize: 12, fill: '#627D98' }} axisLine={false} tickLine={false} />
             <YAxis tick={{ fontSize: 11, fill: '#627D98' }} axisLine={false} tickLine={false}
-              tickFormatter={(v) => `₹${(v / 1000).toFixed(0)}K`} />
-            <Tooltip content={<ChartTooltip />} />
+              tickFormatter={(v) => formatCurrency(v, true, currency)} />
+            <Tooltip content={<ChartTooltip currency={currency} />} />
             <Bar dataKey="assets" fill="#43A047" radius={[4, 4, 0, 0]} opacity={0.8} name="Assets" />
             <Bar dataKey="liabilities" fill="#EF5350" radius={[4, 4, 0, 0]} opacity={0.8} name="Liabilities" />
             <Bar dataKey="netWorth" fill="#007C89" radius={[4, 4, 0, 0]} name="Net Worth" />
@@ -235,7 +241,7 @@ export default function NetWorth() {
           </div>
           <motion.div variants={containerVariants} initial="hidden" animate="visible" className="space-y-1">
             {assets.map((a) => (
-              <ItemRow key={a.id} item={a} colors={ASSET_COLORS} isAdmin={isAdmin}
+              <ItemRow key={a.id} item={a} colors={ASSET_COLORS} isAdmin={isAdmin} currency={currency}
                 onEdit={(item) => setModal({ type: 'asset', item })}
                 onDelete={(id) => handleDelete('asset', id)} />
             ))}
@@ -265,7 +271,7 @@ export default function NetWorth() {
           </div>
           <motion.div variants={containerVariants} initial="hidden" animate="visible" className="space-y-1">
             {liabilities.map((l) => (
-              <ItemRow key={l.id} item={l} colors={LIABILITY_COLORS} isAdmin={isAdmin}
+              <ItemRow key={l.id} item={l} colors={LIABILITY_COLORS} isAdmin={isAdmin} currency={currency}
                 onEdit={(item) => setModal({ type: 'liability', item })}
                 onDelete={(id) => handleDelete('liability', id)} />
             ))}

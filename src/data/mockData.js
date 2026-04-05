@@ -115,12 +115,21 @@ export const INITIAL_TRANSACTIONS = [
   { id: 409, date: '2026-04-05', description: 'Apollo Pharmacy', amount: -1200, category: 'Healthcare', type: 'expense' },
 ]
 
-// Monthly data for charts — Jan to Apr 2026
+// Monthly data for charts — full 12 months of 2026
+// Jan–Apr are real/estimated; May–Dec are projections based on trend
 export const MONTHLY_DATA = [
   { month: 'Jan', income: 122000, expenses: 73817, balance: 48183 },
   { month: 'Feb', income: 108100, expenses: 68271, balance: 39829 },
   { month: 'Mar', income: 139200, expenses: 76267, balance: 62933 },
   { month: 'Apr', income: 110000, expenses: 33319, balance: 76681 },
+  { month: 'May', income: 115000, expenses: 71200, balance: 43800 },
+  { month: 'Jun', income: 128000, expenses: 78400, balance: 49600 },
+  { month: 'Jul', income: 118000, expenses: 69800, balance: 48200 },
+  { month: 'Aug', income: 132000, expenses: 74300, balance: 57700 },
+  { month: 'Sep', income: 121000, expenses: 72100, balance: 48900 },
+  { month: 'Oct', income: 145000, expenses: 80500, balance: 64500 },
+  { month: 'Nov', income: 119000, expenses: 67900, balance: 51100 },
+  { month: 'Dec', income: 155000, expenses: 92000, balance: 63000 },
 ]
 
 // Previous month (March) category spend — used for Insights comparison

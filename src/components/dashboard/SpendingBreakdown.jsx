@@ -26,7 +26,7 @@ const renderActiveShape = (props) => {
 
 export default function SpendingBreakdown({ data }) {
   const [hoverIndex, setHoverIndex] = useState(null)
-  const { setActivePage, setFilter } = useStore()
+  const { setActivePage, setFilter, currency } = useStore()
 
   const total = data.reduce((s, d) => s + d.value, 0)
   const hoveredItem = hoverIndex !== null ? data[hoverIndex] : null
@@ -111,7 +111,7 @@ export default function SpendingBreakdown({ data }) {
                     {hoveredItem.name}
                   </p>
                   <p className="text-sm font-bold mt-0.5 text-navy dark:text-white">
-                    {formatCurrency(hoveredItem.value, true)}
+                    {formatCurrency(hoveredItem.value, true, currency)}
                   </p>
                   <p className="text-[10px] text-navy-400">
                     {((hoveredItem.value / total) * 100).toFixed(0)}%
@@ -128,7 +128,7 @@ export default function SpendingBreakdown({ data }) {
                 >
                   <p className="text-[10px] text-navy-400 dark:text-navy-300">Total Spend</p>
                   <p className="text-sm font-bold text-navy dark:text-white mt-0.5">
-                    {formatCurrency(total, true)}
+                    {formatCurrency(total, true, currency)}
                   </p>
                   <p className="text-[10px] text-navy-400 mt-0.5">
                     {data.length} categories
@@ -168,7 +168,7 @@ export default function SpendingBreakdown({ data }) {
                     {item.name}
                   </span>
                   <span className="text-xs font-mono font-semibold text-navy dark:text-white flex-shrink-0">
-                    {formatCurrency(item.value, true)}
+                    {formatCurrency(item.value, true, currency)}
                   </span>
                   <span className="text-[10px] text-navy-400 w-7 text-right flex-shrink-0">
                     {pct.toFixed(0)}%

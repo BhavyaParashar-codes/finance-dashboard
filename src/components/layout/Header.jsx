@@ -43,8 +43,9 @@ export default function Header({ onMenuClick }) {
         <div className="flex items-center justify-between px-4 lg:px-6 h-16 gap-4">
           {/* Left */}
           <div className="flex items-center gap-3">
+            {/* Hamburger: on mobile (no rail) always show; on sm+ rail handles it so hide */}
             <button onClick={onMenuClick}
-              className="lg:hidden p-2 rounded-xl hover:bg-surface text-navy-500 hover:text-navy transition-colors">
+              className="sm:hidden p-2 rounded-xl hover:bg-surface dark:hover:bg-navy-700 text-navy-500 hover:text-navy dark:hover:text-white transition-colors">
               <Menu size={20} />
             </button>
             <div>
@@ -115,17 +116,14 @@ export default function Header({ onMenuClick }) {
             </button>
 
             {/* CSV Import (admin only) */}
-            <AnimatePresence>
-              {isAdmin && (
-                <motion.button
-                  initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }}
-                  onClick={() => setImportOpen(true)}
-                  className="p-2 rounded-xl hover:bg-border text-navy-400 hover:text-navy dark:hover:bg-navy-700 dark:hover:text-white transition-colors hidden sm:flex"
-                  title="Import CSV">
-                  <Upload size={18} />
-                </motion.button>
-              )}
-            </AnimatePresence>
+            {isAdmin && (
+              <button
+                onClick={() => setImportOpen(true)}
+                className="p-2 rounded-xl hover:bg-border text-navy-400 hover:text-navy dark:hover:bg-navy-700 dark:hover:text-white transition-colors hidden sm:flex"
+                title="Import CSV">
+                <Upload size={18} />
+              </button>
+            )}
 
             {/* Alerts bell */}
             <div className="relative">

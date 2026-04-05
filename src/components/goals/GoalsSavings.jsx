@@ -289,14 +289,29 @@ function AddGoalModal({ onClose, onAdd }) {
 
 function ContributeModal({ goal, currency, onClose, onConfirm }) {
   const [displayVal, setDisplayVal] = useState('')
+  const sym = { INR: '₹', USD: '$', EUR: '€' }[currency] || '₹'
 
-  const numericVal = Number(stripCommas(displayVal))
+  // For non-INR currencies, goal targets are stored in INR but we let user enter in selected currency
+  // The numericVal is treated as the selected-currency amount, stored as INR equivalent
+  const { CURRENCY_RATES } = { CURRENCY_RATES: { INR: 1, USD: 0.012, EUR: 0.011 } }
+  const rate = { INR: 1, USD: 0.012, EUR: 0.011 }[currency] || 1
+
+  const numericVal = Number(displayVal.replace(/,/g, ''))
   const valid = !isNaN(numericVal) && numericVal > 0
+
+  // Convert entered amount back to INR for storage
+  const inrEquivalent = valid ? Math.round(numericVal / rate) : 0
 
   const handleChange = (e) => {
     const raw = e.target.value.replace(/,/g, '')
-    if (raw === '' || /^\d+$/.test(raw)) {
-      setDisplayVal(raw === '' ? '' : Number(raw).toLocaleString('en-IN'))
+    if (raw === '' || /^\d+(\.\d{0,2})?$/.test(raw)) {
+      if (raw === '') { setDisplayVal(''); return }
+      // Format integers with commas, leave decimals alone while typing
+      if (!raw.includes('.')) {
+        setDisplayVal(Number(raw).toLocaleString(currency === 'INR' ? 'en-IN' : 'en-US'))
+      } else {
+        setDisplayVal(raw)
+      }
     }
   }
 
@@ -309,10 +324,10 @@ function ContributeModal({ goal, currency, onClose, onConfirm }) {
         <p className="text-xs text-navy-400 mb-4">{goal.icon} {goal.name}</p>
 
         <div className="relative mb-2">
-          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-navy-400 text-sm font-medium select-none">₹</span>
+          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-navy-400 text-sm font-medium select-none">{sym}</span>
           <input
             type="text"
-            inputMode="numeric"
+            inputMode="decimal"
             placeholder="0"
             value={displayVal}
             onChange={handleChange}
@@ -322,26 +337,24 @@ function ContributeModal({ goal, currency, onClose, onConfirm }) {
           />
         </div>
 
-        {/* Live formatted preview */}
+        {/* Live preview */}
         {valid && (
           <motion.p initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }}
             className="text-xs text-navy-400 mb-4 text-center">
-            {formatCurrency(numericVal, false, currency)}
+            {currency !== 'INR' && <span className="text-navy-300">≈ {formatCurrency(inrEquivalent, false, 'INR')} · </span>}
             {goal.target > 0 && (
-              <span className="ml-1">
-                · {Math.min(((goal.saved + numericVal) / goal.target * 100), 100).toFixed(1)}% of goal
-              </span>
+              <span>{Math.min(((goal.saved + inrEquivalent) / goal.target * 100), 100).toFixed(1)}% of goal</span>
             )}
           </motion.p>
         )}
 
         <div className="flex gap-3 mt-4">
           <button onClick={onClose} className="btn-ghost flex-1 justify-center">Cancel</button>
-          <button onClick={() => valid && onConfirm(numericVal)}
+          <button onClick={() => valid && onConfirm(inrEquivalent)}
             disabled={!valid}
             className={`btn-primary flex-1 justify-center ${!valid ? 'opacity-50 cursor-not-allowed' : ''}`}
             style={valid ? { background: goal.color } : {}}>
-            Add {valid ? formatCurrency(numericVal, true, currency) : '₹0'}
+            Add {sym}{valid ? numericVal.toLocaleString(currency === 'INR' ? 'en-IN' : 'en-US') : '0'}
           </button>
         </div>
       </motion.div>

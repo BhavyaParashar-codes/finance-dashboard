@@ -76,9 +76,12 @@ const TYPE_STYLES = {
 }
 
 export default function AlertsCenter({ open, onClose }) {
-  const { dismissAlert, clearDismissedAlerts, setActivePage } = useStore()
+  const { dismissAlert, setActivePage } = useStore()
   const alerts = useAlerts()
   const ref = useRef(null)
+
+  // Dismiss every currently visible alert one by one
+  const handleClearAll = () => alerts.forEach((a) => dismissAlert(a.id))
 
   useEffect(() => {
     if (!open) return
@@ -111,7 +114,7 @@ export default function AlertsCenter({ open, onClose }) {
             </div>
             <div className="flex items-center gap-2">
               {alerts.length > 0 && (
-                <button onClick={clearDismissedAlerts}
+                <button onClick={handleClearAll}
                   className="text-xs text-navy-400 hover:text-teal transition-colors">
                   Clear all
                 </button>

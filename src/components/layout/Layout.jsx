@@ -1,12 +1,14 @@
-import React, { useState, useEffect } from 'react'
-import Sidebar from './Sidebar'
+import React, { useState, useEffect, useCallback } from 'react'
+import { AnimatePresence, motion } from 'framer-motion'
+import Sidebar, { IconRail } from './Sidebar'
 import Header from './Header'
 import useStore from '../../store/useStore'
 
 export default function Layout({ children }) {
-  const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [drawerOpen, setDrawerOpen] = useState(false)
   const { darkMode } = useStore()
 
+  // Apply dark mode class
   useEffect(() => {
     if (darkMode) {
       document.documentElement.classList.add('dark')
@@ -15,29 +17,55 @@ export default function Layout({ children }) {
     }
   }, [darkMode])
 
+  // Close drawer on Escape key
+  useEffect(() => {
+    const handler = (e) => { if (e.key === 'Escape') setDrawerOpen(false) }
+    window.addEventListener('keydown', handler)
+    return () => window.removeEventListener('keydown', handler)
+  }, [])
+
+  const openDrawer = useCallback(() => setDrawerOpen(true), [])
+  const closeDrawer = useCallback(() => setDrawerOpen(false), [])
+
   return (
     <div className="flex h-screen overflow-hidden bg-surface dark:bg-navy-900">
-      {/* Desktop Sidebar */}
-      <div className="hidden lg:flex flex-shrink-0">
-        <Sidebar />
-      </div>
 
-      {/* Mobile Sidebar Overlay */}
-      {sidebarOpen && (
-        <div className="fixed inset-0 z-50 lg:hidden">
-          <div
-            className="absolute inset-0 bg-navy/30 backdrop-blur-sm"
-            onClick={() => setSidebarOpen(false)}
-          />
-          <div className="absolute left-0 top-0 h-full animate-slide-in">
-            <Sidebar mobile onClose={() => setSidebarOpen(false)} />
-          </div>
-        </div>
-      )}
+      {/* Permanent icon rail — hidden on mobile (xs), visible sm+ */}
+      <IconRail onOpen={openDrawer} />
 
-      {/* Main content */}
+      {/* Slide-in drawer overlay — all screen sizes */}
+      <AnimatePresence>
+        {drawerOpen && (
+          <>
+            {/* Backdrop */}
+            <motion.div
+              key="backdrop"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="fixed inset-0 z-40 bg-navy/30 backdrop-blur-sm"
+              onClick={closeDrawer}
+            />
+
+            {/* Drawer panel */}
+            <motion.div
+              key="drawer"
+              initial={{ x: '-100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '-100%' }}
+              transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
+              className="fixed left-0 top-0 h-full z-50"
+            >
+              <Sidebar onClose={closeDrawer} />
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+
+      {/* Main content area */}
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
-        <Header onMenuClick={() => setSidebarOpen(true)} />
+        <Header onMenuClick={openDrawer} />
         <main className="flex-1 overflow-y-auto">
           <div className="max-w-7xl mx-auto p-4 lg:p-6 animate-fade-in">
             {children}
