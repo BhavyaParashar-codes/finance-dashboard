@@ -96,9 +96,7 @@ npm run preview   # preview the production build locally
 
 ---
 
-## 🌐 Deploy to Vercel
-
-**Deployment**
+### Live Demo 
 The project is live and automatically deploys on every push to the main branch via Vercel.
 
 Production URL: https://finance-dashboard-seven-tau-62.vercel.app/
