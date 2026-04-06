@@ -94,8 +94,6 @@ npm run build
 npm run preview   # preview the production build locally
 ```
 
----
-
 ### Live Demo 
 The project is live and automatically deploys on every push to the main branch via Vercel.
 
@@ -104,6 +102,8 @@ Production URL: https://finance-dashboard-seven-tau-62.vercel.app/
 Environment: Production
 
 Routing: SPA routing handled via vercel.json.
+
+---
 
 ## 📁 Project Structure
 
